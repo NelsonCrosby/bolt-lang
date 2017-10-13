@@ -17,6 +17,6 @@ $(out)/$(TARGET): $(FILE_O)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(out)/%.o: %.c
-	$(CC) -c $(CFLAGS) -MMD -o $@ $^
+	$(CC) -c $(CFLAGS) -MMD -o $@ $<
 
 -include $(FILE_D)

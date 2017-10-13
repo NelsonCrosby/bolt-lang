@@ -13,4 +13,4 @@ build/boltc/boltc:
 clean-boltc:
 	@echo 'make -C src/boltc clean'
 	@$(MAKE) -C src/boltc $(mkvars)/boltc clean
-.PHONY: boltc clean-boltc
+.PHONY: boltc build/boltc/boltc clean-boltc
