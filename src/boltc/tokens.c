@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "tokens.h"
 
@@ -52,11 +53,10 @@ token_t *tkn_next(tkn_t *t)
     }
 }
 
-void tkn_push(tkn_t *t, token_t token)
+token_t *tkn_push(tkn_t *t, token_type_t type)
 {
     struct token_list_node *node = malloc(sizeof (node));
     node->token = malloc(sizeof (node->token));
-    *node->token = token;
     node->next = NULL;
 
     if (!t->tokens.first) {
@@ -70,4 +70,79 @@ void tkn_push(tkn_t *t, token_t token)
     }
 
     t->tokens.last = node;
+
+    token_t *token = node->token;
+    token->header.type = type;
+
+    if (type >= TOKEN_VALUE && type < _TOKEN_VALUE_MAX)
+        token->header.category = TOKEN_CATEG_VALUE;
+    else if (type == TOKEN_IDENT)
+        token->header.category = TOKEN_CATEG_IDENT;
+    else if (type >= TOKEN_KW && type < _TOKEN_KW_MAX)
+        token->header.category = TOKEN_CATEG_KEYWORD;
+    else if (type >= TOKEN_KWV && type < _TOKEN_KWV_MAX)
+        token->header.category = TOKEN_CATEG_KEYWORD | TOKEN_CATEG_VALUE;
+    else if (type >= TOKEN_KWI && type < _TOKEN_KWI_MAX)
+        token->header.category = TOKEN_CATEG_KEYWORD | TOKEN_CATEG_IDENT;
+    else if (type >= TOKEN_OP && type < _TOKEN_OP_MAX)
+        token->header.category = TOKEN_CATEG_OPERATOR;
+    else
+        token->header.category = 0;
+
+    return token;
+}
+
+token_t *tkn_push_comment(tkn_t *t, const char *comment)
+{
+    token_t *token = tkn_push(t, TOKEN_COMMENT);
+    token->comment.body = comment;
+    return token;
+}
+
+token_t *tkn_push_vint(
+    tkn_t *t, long long value, int size, enum _token_vint_repr repr
+)
+{
+    if (size == 0 && value) {
+        if (value > 0)
+            size = value <= INT8_MAX ? 1
+                : value <= INT16_MAX - 1 ? 2
+                : value <= INT32_MAX - 1 ? 4
+                : value <= INT64_MAX - 1 ? 8
+                : -1;
+        else
+            size = value >= INT8_MIN ? 1
+                : value >= INT16_MIN ? 2
+                : value >= INT32_MIN ? 4
+                : value >= INT64_MIN ? 8
+                : -1;
+    }
+
+    token_t *token = tkn_push(t, TOKEN_VINT);
+    token->vint.value = value;
+    token->vint.size = size;
+    token->vint.repr = repr;
+    return token;
+}
+
+token_t *tkn_push_vfloat(tkn_t *t, long double value)
+{
+    token_t *token = tkn_push(t, TOKEN_VFLOAT);
+    token->vfloat.value = value;
+    return token;
+}
+
+token_t *tkn_push_vstring(tkn_t *t, size_t length, const char *value)
+{
+    token_t *token = tkn_push(t, TOKEN_VSTRING);
+    token->vstring.length = length;
+    token->vstring.data = value;
+    return token;
+}
+
+token_t *tkn_push_ident(tkn_t *t, const char *ident)
+{
+    token_t *token = tkn_push(t, TOKEN_IDENT);
+    token->ident.ident = ident;
+    return token;
 }
