@@ -1,0 +1,4 @@
+conf.make
+
+# All output gets put in the build directory
+build/
