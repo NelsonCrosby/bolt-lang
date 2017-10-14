@@ -7,4 +7,5 @@ mkvars := \
     CFLAGS=$(CFLAGS) \
     CC=$(CC) \
     LEMON=$(LEMON) \
+    ZLEXGEN=$(ZLEXGEN) \
     OUTDIR=$(TOPDIR)/build
