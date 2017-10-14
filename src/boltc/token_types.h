@@ -52,6 +52,8 @@ typedef enum token_type {
         TOKEN_OP_ASSIGN,        // =
         TOKEN_OP_DECL,          // :
 
+        TOKEN_OP_ACCESS,        // .
+
         TOKEN_OP_EQ,            // ==
         TOKEN_OP_NEQ,           // !=
         TOKEN_OP_LT,            // <
@@ -75,5 +77,7 @@ typedef enum token_type {
 
     TOKEN_PAREN = 0x0200,
     TOKEN_PAREN_OPEN,
-    TOKEN_PAREN_CLOSE
+    TOKEN_PAREN_CLOSE,
+    TOKEN_RPAREN_OPEN,
+    TOKEN_RPAREN_CLOSE
 } token_type_t;

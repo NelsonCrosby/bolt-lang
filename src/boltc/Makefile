@@ -1,6 +1,6 @@
 
 TARGET = boltc
 DIRS =
-FILES = main.c tokens.c
+FILES = main.c lexer.c tokens.c
 
 include $(TMAKE)
