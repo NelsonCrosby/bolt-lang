@@ -1,0 +1,150 @@
+
+:
+    / \w /      # In general, whitespace is ignored.
+
+comment:
+    /
+        \#      # Line comments start with a #
+        ( [^\n] *)  # Any character except newline is valid
+    /
+
+
+### Literal values ###
+
+@category: value
+
+vint.dec:
+    /
+        ([+-]?)     # Optional sign, + or -
+        ([0-9 _] +) # 0-9 and underscores (which are stripped)
+    /
+
+vint.hex:
+    /
+        0x          # Hex indicator prefix
+        ([0-9 A-F _] +)
+    /i      # Note that A-F could also be a-f
+
+vint.bin:
+    /
+        0b          # Binary indicator prefix
+        ([01 _] +)
+    /
+
+
+vfloat.simple:
+    / $vint_dec \. ([0-9 _] +) /
+
+vfloat.exp:
+    / $vfloat_simple e $vint_dec /i
+
+
+vstring:
+    /
+        "   # Start with double-quote
+        (
+            (:  # String can contain:
+                [^ " \n]    # No double-quotes or newlines
+                | \\ "      # Or a backslash-escaped double quote
+            ) *
+        )
+        "   # End with double-quote
+    /
+
+
+### Identifiers ###
+
+@category: ident
+
+ident:
+    /
+        (
+            [a-z A-Z _]         # Start with a letter or underscore
+            [a-z A-Z 0-9 _] *   # Contain letters, underscores, digits
+        )
+    /
+
+
+### Keywords ###
+
+@category: keyword
+
+kw_do:      "do"
+kw_with:    "with"
+kw_then:    "then"
+kw_end:     "end"
+
+kw_struct:  "struct"
+kw_iface:   "interface"
+
+kw_if:      "if"
+kw_elif:    "elif"
+kw_else:    "else"
+
+kw_while:   "while"
+kw_for:     "for"
+kw_let:     "let"
+
+kw_return:  "return"
+kw_goto:    "goto"
+kw_break:   "break"
+kw_cont:    "continue"
+
+# Value keywords
+@category: keyword, value
+
+kwv_nil:    "nil"
+kwv_true:   "true"
+kwv_false:  "false"
+
+# Keywords usable as an ident
+@category: keyword, ident
+
+kwi_ref:    "ref"
+kwi_ptr:    "ptr"
+
+kwi_and:    "and"
+kwi_or:     "or"
+kwi_xor:    "xor"
+kwi_not:    "not"
+kwi_in:     "in"
+kwi_as:     "as"
+
+
+### Operators ###
+@category: operator
+
+op_assign:  "="
+op_decl:    ":"
+
+op_access:  "."
+op_comma:   ","
+
+op_eq:      "=="
+op_ne:      "!="
+op_lt:      "<"
+op_le:      "<="
+op_gt:      ">"
+op_ge:      ">="
+
+op_add:     "+"
+op_sub:     "-"
+op_mul:     "*"
+op_div:     "/"
+
+op_band:    "&"
+op_bor:     "|"
+op_bxor:    "^"
+op_bnot:    "~"
+op_shl:     "<<"
+op_shr:     ">>"
+
+
+### Braces, parentheses... ###
+
+@category: .
+
+paren_open:     "("
+paren_close:    ")"
+square_open:    "["
+square_close:   "]"
