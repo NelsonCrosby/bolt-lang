@@ -6,9 +6,22 @@
 #include "lexer.h"
 
 
+struct lex_store_mem {
+    const char *src;
+    size_t len, pos;
+};
+
+union lex_store {
+    struct lex_store_mem mem;
+};
+
 struct lexer {
     token_list_t *tokens;
-    _Bool done;
+    enum {
+        LEX_STORE_NONE;
+        LEX_STORE_MEM;
+    } store_type;
+    union lex_store store;
 };
 
 
@@ -54,6 +67,8 @@ int lex_step(lexer_t *lex)
         tkl_push(lex->tokens, TOKEN_PAREN_OPEN);
         const char *hw = "Hello, World!";
         tkl_push_vstring(lex->tokens, strlen(hw), hw);
+        tkl_push(lex->tokens, TOKEN_OP_COMMA);
+        tkl_push_vint(lex->tokens, 33, 0, TOKEN_VINT_HEX);
         tkl_push(lex->tokens, TOKEN_PAREN_CLOSE);
         tkl_push(lex->tokens, TOKEN_KW_END);
         

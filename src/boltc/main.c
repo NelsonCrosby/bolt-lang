@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "tokens.h"
-#include "lexer.h"
+#include "lex/tokens.h"
+#include "lex/lexer.h"
 
 
 int main(int argv, char **argc)
@@ -17,7 +17,15 @@ int main(int argv, char **argc)
             printf("%s\n", t->comment.body);
             break;
         case TOKEN_VINT:
-            printf("%d\n", t->vint.value);
+            switch (t->vint.repr) {
+            case TOKEN_VINT_BIN:
+            case TOKEN_VINT_HEX:
+                printf("0x%llX", t->vint.value);
+                break;
+            default:
+                printf("%lld", t->vint.value);
+                break;
+            }
             break;
         case TOKEN_VSTRING:
             printf("\"%*s\"", t->vstring.length, t->vstring.data);
@@ -36,6 +44,9 @@ int main(int argv, char **argc)
             break;
         case TOKEN_OP_ACCESS:
             printf(".");
+            break;
+        case TOKEN_OP_COMMA:
+            printf(", ");
             break;
         case TOKEN_PAREN_OPEN:
             printf("(");

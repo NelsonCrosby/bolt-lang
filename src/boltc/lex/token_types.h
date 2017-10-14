@@ -53,6 +53,7 @@ typedef enum token_type {
         TOKEN_OP_DECL,          // :
 
         TOKEN_OP_ACCESS,        // .
+        TOKEN_OP_COMMA,         // ,
 
         TOKEN_OP_EQ,            // ==
         TOKEN_OP_NEQ,           // !=
