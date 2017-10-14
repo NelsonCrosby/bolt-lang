@@ -7,6 +7,7 @@
 typedef struct token_header {
     token_type_t type;
     enum {
+        TOKEN_CATEG_NONE = 0,
         TOKEN_CATEG_VALUE = 1,
         TOKEN_CATEG_IDENT = 2,
         TOKEN_CATEG_KEYWORD = 4,
@@ -58,18 +59,18 @@ typedef union token {
     // entries.
 } token_t;
 
-typedef struct tokenizer tkn_t;
+typedef struct token_list token_list_t;
 
-tkn_t *tkn_new();
-void tkn_free(tkn_t *t);
+token_list_t *tkl_new();
+void tkl_free(token_list_t *t);
 
-token_t *tkn_next(tkn_t *t);
+token_t *tkl_next(token_list_t *t);
 
-token_t *tkn_push(tkn_t *t, token_type_t type);
-token_t *tkn_push_comment(tkn_t *t, const char *comment);
-token_t *tkn_push_vint(
-    tkn_t *t, long long value, int size, enum _token_vint_repr repr
+token_t *tkl_push(token_list_t *t, token_type_t type);
+token_t *tkl_push_comment(token_list_t *t, const char *comment);
+token_t *tkl_push_vint(
+    token_list_t *t, long long value, int size, enum _token_vint_repr repr
 );
-token_t *tkn_push_vfloat(tkn_t *t, long double value);
-token_t *tkn_push_vstring(tkn_t *t, size_t length, const char *value);
-token_t *tkn_push_ident(tkn_t *t, const char *ident);
+token_t *tkl_push_vfloat(token_list_t *t, long double value);
+token_t *tkl_push_vstring(token_list_t *t, size_t length, const char *value);
+token_t *tkl_push_ident(token_list_t *t, const char *ident);

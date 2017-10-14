@@ -16,60 +16,58 @@ struct token_list {
     token_t *prev;
 };
 
-struct tokenizer {
-    struct token_list tokens;
-};
 
-
-tkn_t *tkn_new()
+token_list_t *tkl_new()
 {
-    tkn_t *t = malloc(sizeof (t));
-    t->tokens.first = NULL;
-    t->tokens.last = NULL;
-    t->tokens.prev = NULL;
+    token_list_t *t = malloc(sizeof (t));
+    t->first = NULL;
+    t->last = NULL;
+    t->prev = NULL;
     return t;
 }
 
-void tkn_free(tkn_t *t)
+void tkl_free(token_list_t *t)
 {
+    for (token_t *token; token = tkl_next(t); ) {
+    }
     free(t);
 }
 
-token_t *tkn_next(tkn_t *t)
+token_t *tkl_next(token_list_t *t)
 {
-    if (t->tokens.prev) {
-        free(t->tokens.prev);
-        t->tokens.prev = NULL;
+    if (t->prev) {
+        free(t->prev);
+        t->prev = NULL;
     }
-    struct token_list_node *node = t->tokens.first;
+    struct token_list_node *node = t->first;
     if (node) {
         token_t *token = node->token;
-        t->tokens.first = node->next;
+        t->first = node->next;
         free(node);
-        t->tokens.prev = token;
+        t->prev = token;
         return token;
     } else {
         return NULL;
     }
 }
 
-token_t *tkn_push(tkn_t *t, token_type_t type)
+token_t *tkl_push(token_list_t *t, token_type_t type)
 {
     struct token_list_node *node = malloc(sizeof (node));
     node->token = malloc(sizeof (node->token));
     node->next = NULL;
 
-    if (!t->tokens.first) {
-        t->tokens.first = node;
+    if (!t->first) {
+        t->first = node;
     }
 
-    if (t->tokens.last) {
-        t->tokens.last->next = node;
+    if (t->last) {
+        t->last->next = node;
     } else {
-        t->tokens.last = node;
+        t->last = node;
     }
 
-    t->tokens.last = node;
+    t->last = node;
 
     token_t *token = node->token;
     token->header.type = type;
@@ -87,20 +85,20 @@ token_t *tkn_push(tkn_t *t, token_type_t type)
     else if (type >= TOKEN_OP && type < _TOKEN_OP_MAX)
         token->header.category = TOKEN_CATEG_OPERATOR;
     else
-        token->header.category = 0;
+        token->header.category = TOKEN_CATEG_NONE;
 
     return token;
 }
 
-token_t *tkn_push_comment(tkn_t *t, const char *comment)
+token_t *tkl_push_comment(token_list_t *t, const char *comment)
 {
-    token_t *token = tkn_push(t, TOKEN_COMMENT);
+    token_t *token = tkl_push(t, TOKEN_COMMENT);
     token->comment.body = comment;
     return token;
 }
 
-token_t *tkn_push_vint(
-    tkn_t *t, long long value, int size, enum _token_vint_repr repr
+token_t *tkl_push_vint(
+    token_list_t *t, long long value, int size, enum _token_vint_repr repr
 )
 {
     if (size == 0 && value) {
@@ -118,31 +116,31 @@ token_t *tkn_push_vint(
                 : -1;
     }
 
-    token_t *token = tkn_push(t, TOKEN_VINT);
+    token_t *token = tkl_push(t, TOKEN_VINT);
     token->vint.value = value;
     token->vint.size = size;
     token->vint.repr = repr;
     return token;
 }
 
-token_t *tkn_push_vfloat(tkn_t *t, long double value)
+token_t *tkl_push_vfloat(token_list_t *t, long double value)
 {
-    token_t *token = tkn_push(t, TOKEN_VFLOAT);
+    token_t *token = tkl_push(t, TOKEN_VFLOAT);
     token->vfloat.value = value;
     return token;
 }
 
-token_t *tkn_push_vstring(tkn_t *t, size_t length, const char *value)
+token_t *tkl_push_vstring(token_list_t *t, size_t length, const char *value)
 {
-    token_t *token = tkn_push(t, TOKEN_VSTRING);
+    token_t *token = tkl_push(t, TOKEN_VSTRING);
     token->vstring.length = length;
     token->vstring.data = value;
     return token;
 }
 
-token_t *tkn_push_ident(tkn_t *t, const char *ident)
+token_t *tkl_push_ident(token_list_t *t, const char *ident)
 {
-    token_t *token = tkn_push(t, TOKEN_IDENT);
+    token_t *token = tkl_push(t, TOKEN_IDENT);
     token->ident.ident = ident;
     return token;
 }
