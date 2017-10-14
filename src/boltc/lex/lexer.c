@@ -17,9 +17,10 @@ union lex_store {
 
 struct lexer {
     token_list_t *tokens;
+    _Bool done;
     enum {
-        LEX_STORE_NONE;
-        LEX_STORE_MEM;
+        LEX_STORE_NONE,
+        LEX_STORE_MEM
     } store_type;
     union lex_store store;
 };
