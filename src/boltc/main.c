@@ -10,9 +10,15 @@ int main(int argv, char **argc)
 {
     const char *src = " \n"
         "# This is a comment.\n"
-        "# And another... \n";
+        "# And another... \n"
+        "  \"a string\\n containing a #\"";
     lexer_t *lex = lex_new_mem(strlen(src), src);
-    while (!lex_step(lex)) {}
+    int ret;
+    while (!(ret = lex_step(lex))) {}
+    if (ret < 0) {
+        printf("ERR %d\n", ret);
+        return 1;
+    }
 
     for (token_t *t; t = lex_next(lex); ) {
         switch (t->header.type) {
@@ -31,7 +37,7 @@ int main(int argv, char **argc)
             }
             break;
         case TOKEN_VSTRING:
-            printf("\"%*s\"", t->vstring.length, t->vstring.data);
+            printf("\"%s\"", t->vstring.data);
             break;
         case TOKEN_IDENT:
             printf("%s", t->ident.ident);
@@ -67,6 +73,8 @@ int main(int argv, char **argc)
             printf(" {? %d ?}", t->header.type);
         }
     }
+
+    printf("\n");
 
     lex_free(lex);
     return 0;

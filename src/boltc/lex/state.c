@@ -6,10 +6,14 @@
 #include "state.h"
 
 
+#define STB_ANY                 32
 #define STC_LCOMMENT_START      '#'
 #define STC_LCOMMENT_END        '\n'
-#define STB_ANY                 32
 #define STB_LCOMMENT            80
+#define STC_VSTRING_START       '"'
+#define STC_VSTRING_END         '"'
+#define STC_VSTRING_ESC         '\\'
+#define STB_VSTRING             80
 
 
 typedef enum _zlex_state_next_status _status;
@@ -27,6 +31,7 @@ struct zlex_state {
 
 static _status state_start(zlex_state_t *state);
 static _status state_comment(zlex_state_t *state);
+static _status state_vstring(zlex_state_t *state);
 
 
 zlex_state_t *zlex_state_new(token_list_t *tkl, size_t len, const char *src)
@@ -127,6 +132,10 @@ static _status state_start(zlex_state_t *state)
         state->step = state_comment;
         _cpy_alloc(state, STB_LCOMMENT);
         return ZLEX_STATE_PROCESSING;
+    case STC_VSTRING_START:
+        state->step = state_vstring;
+        _cpy_alloc(state, STB_VSTRING);
+        return ZLEX_STATE_PROCESSING;
     default:
         return ZLEX_STATE_INVALID;
     }
@@ -144,6 +153,45 @@ static _status state_comment(zlex_state_t *state)
         _cpy_null(state);
         state->step = state_start;
         return ZLEX_STATE_NEWTOKEN;
+    } else {
+        _cpy_append(state, c);
+        return ZLEX_STATE_PROCESSING;
+    }
+}
+
+static _status state_vstring(zlex_state_t *state)
+{
+    if (!state->pos_len)
+        return ZLEX_STATE_NONELEFT;
+    
+    char c = _nc(state);
+    if (c == STC_VSTRING_END) {
+        _nc(state);
+        _cpy_append(state, '\0');
+        tkl_push_vstring(state->tokens, state->cpy_len, state->cpy);
+        _cpy_null(state);
+        state->step = state_start;
+        return ZLEX_STATE_NEWTOKEN;
+    } else if (c == STC_VSTRING_ESC) {
+        switch (_nc(state)) {
+        case STC_VSTRING_ESC:
+            _cpy_append(state, STC_VSTRING_ESC);
+            break;
+        case STC_VSTRING_END:
+            _cpy_append(state, STC_VSTRING_END);
+            break;
+        case 'n':
+            _cpy_append(state, '\n');
+            break;
+        case 't':
+            _cpy_append(state, '\t');
+            break;
+        default:
+            return ZLEX_STATE_INVALID;
+        }
+        return ZLEX_STATE_PROCESSING;
+    } else if (c == '\n') {
+        return ZLEX_STATE_INVALID;
     } else {
         _cpy_append(state, c);
         return ZLEX_STATE_PROCESSING;
