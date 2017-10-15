@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "tokens.h"
+#include "state.h"
 #include "lexer.h"
 
 
@@ -10,6 +11,7 @@ struct lex_store_mem {
     const char *src;
     size_t len, pos;
 };
+static int lex_step_mem(lexer_t *lex);
 
 union lex_store {
     struct lex_store_mem mem;
@@ -17,20 +19,27 @@ union lex_store {
 
 struct lexer {
     token_list_t *tokens;
-    _Bool done;
-    enum {
-        LEX_STORE_NONE,
-        LEX_STORE_MEM
-    } store_type;
+    int (*step)(lexer_t *lex);
     union lex_store store;
+    zlex_state_t *sm_state;
 };
 
 
-lexer_t *lex_new()
+static lexer_t *lex_new(size_t src_len, const char *src)
 {
-    lexer_t *lex = malloc(sizeof (lex));
+    lexer_t *lex = malloc(sizeof (*lex));
     lex->tokens = tkl_new();
-    lex->done = 0;
+    lex->sm_state = zlex_state_new(lex->tokens, src_len, src);
+    return lex;
+}
+
+lexer_t *lex_new_mem(size_t len, const char *src)
+{
+    lexer_t *lex = lex_new(len, src);
+    lex->step = lex_step_mem;
+    lex->store.mem.src = src;
+    lex->store.mem.len = len;
+    lex->store.mem.pos = 0;
 
     return lex;
 }
@@ -45,36 +54,19 @@ void lex_free(lexer_t *lex)
 
 int lex_step(lexer_t *lex)
 {
-    // TODO: Real stepping over file
-    if (lex->done) {
-        return 1;
-    } else {
-        tkl_push_comment(lex->tokens, "# These are some example tokens.");
-        tkl_push_ident(lex->tokens, "main");
-        tkl_push(lex->tokens, TOKEN_PAREN_OPEN);
-        tkl_push_ident(lex->tokens, "args");
-        tkl_push(lex->tokens, TOKEN_OP_DECL);
-        tkl_push_ident(lex->tokens, "Array");
-        tkl_push(lex->tokens, TOKEN_RPAREN_OPEN);
-        tkl_push_ident(lex->tokens, "String");
-        tkl_push(lex->tokens, TOKEN_RPAREN_CLOSE);
-        tkl_push(lex->tokens, TOKEN_PAREN_CLOSE);
-        tkl_push(lex->tokens, TOKEN_OP_DECL);
-        tkl_push_ident(lex->tokens, "int");
-        tkl_push(lex->tokens, TOKEN_KW_DO);
-        tkl_push_ident(lex->tokens, "io");
-        tkl_push(lex->tokens, TOKEN_OP_ACCESS);
-        tkl_push_ident(lex->tokens, "print");
-        tkl_push(lex->tokens, TOKEN_PAREN_OPEN);
-        const char *hw = "Hello, World!";
-        tkl_push_vstring(lex->tokens, strlen(hw), hw);
-        tkl_push(lex->tokens, TOKEN_OP_COMMA);
-        tkl_push_vint(lex->tokens, 33, 0, TOKEN_VINT_HEX);
-        tkl_push(lex->tokens, TOKEN_PAREN_CLOSE);
-        tkl_push(lex->tokens, TOKEN_KW_END);
-        
-        lex->done = 1;
+    return lex->step(lex);
+}
+
+static int lex_step_mem(lexer_t *lex)
+{
+    switch (zlex_state_step(lex->sm_state)) {
+    case ZLEX_STATE_PROCESSING:
+    case ZLEX_STATE_NEWTOKEN:
         return 0;
+    case ZLEX_STATE_NONELEFT:
+        return 1;
+    case ZLEX_STATE_INVALID:
+        return -1;
     }
 }
 

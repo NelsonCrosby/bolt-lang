@@ -8,13 +8,16 @@
 
 int main(int argv, char **argc)
 {
-    lexer_t *lex = lex_new();
+    const char *src = " \n"
+        "# This is a comment.\n"
+        "# And another... \n";
+    lexer_t *lex = lex_new_mem(strlen(src), src);
     while (!lex_step(lex)) {}
 
     for (token_t *t; t = lex_next(lex); ) {
         switch (t->header.type) {
         case TOKEN_COMMENT:
-            printf("%s\n", t->comment.body);
+            printf("#%s\n", t->comment.body);
             break;
         case TOKEN_VINT:
             switch (t->vint.repr) {

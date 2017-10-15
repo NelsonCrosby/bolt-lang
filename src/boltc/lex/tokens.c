@@ -19,7 +19,7 @@ struct token_list {
 
 token_list_t *tkl_new()
 {
-    token_list_t *t = malloc(sizeof (t));
+    token_list_t *t = malloc(sizeof (*t));
     t->first = NULL;
     t->last = NULL;
     t->prev = NULL;
@@ -53,8 +53,8 @@ token_t *tkl_next(token_list_t *t)
 
 token_t *tkl_push(token_list_t *t, token_type_t type)
 {
-    struct token_list_node *node = malloc(sizeof (node));
-    node->token = malloc(sizeof (node->token));
+    struct token_list_node *node = malloc(sizeof (*node));
+    node->token = malloc(sizeof (*node->token));
     node->next = NULL;
 
     if (!t->first) {
