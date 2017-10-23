@@ -6,11 +6,10 @@ all: boltc
 clean: clean-boltc
 .PHONY: all clean
 
-boltc: build/boltc/boltc
-build/boltc/boltc:
+boltc:
 	@echo 'make -C src/boltc'
-	@$(MAKE) -C src/boltc $(mkvars)/boltc
+	@$(MAKE) -C src/boltc $(mkvars)
 clean-boltc:
 	@echo 'make -C src/boltc clean'
-	@$(MAKE) -C src/boltc $(mkvars)/boltc clean
-.PHONY: boltc build/boltc/boltc clean-boltc
+	@$(MAKE) -C src/boltc $(mkvars) clean
+.PHONY: boltc clean-boltc

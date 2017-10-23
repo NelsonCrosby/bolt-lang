@@ -1,6 +1,12 @@
 
 TARGET = boltc
-DIRS = lex
-FILES = main.c lex/lexer.c lex/state.c lex/tokens.c
+DIRS =
+FILES = main.c parser.c
+
+LDDEPS += $(OUTDIR)/mpc.o
+CLEAN += $(LDDEPS)
 
 include $(TMAKE)
+
+$(OUTDIR)/mpc.o: $(VENDOR)/mpc/mpc.c
+	$(_cc)
