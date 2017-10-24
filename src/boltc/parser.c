@@ -11,7 +11,7 @@ static mpc_parser_t *zparser_comment()
             mpcf_strfold,
             mpc_and(            // # (...)
                 2, mpcf_snd,
-                mpc_apply(mpc_char('#'), mpcf_free),
+                mpc_stripl(mpc_apply(mpc_char('#'), mpcf_free)),
                 mpc_and(        // (... \n)
                     2, mpcf_strfold,
                     mpc_many(   // ([^\n] *)

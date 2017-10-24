@@ -9,7 +9,7 @@ int main(int argv, char **argc)
 {
     const char *lit =
         "#foo bar baz\n"
-        "# box\n";
+        " # box\n";
 
     mpc_parser_t *zp = zparser_new();
 
